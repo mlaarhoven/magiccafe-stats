@@ -1,0 +1,5 @@
+cgi-bin/
+strook_templates/
+cache/
+temp/
+vendors/
