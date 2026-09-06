@@ -69,8 +69,15 @@
             <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="page_anydesk.php">
             <svg class="c-sidebar-nav-icon">
               <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-external-link"></use>
-              </svg> Anydesk  </a></li>     
+              </svg> Anydesk  </a></li>
         <?php } ?>
+
+          <?php if ( $_SESSION['client_role'] == 'admin' ) { ?>
+          <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="page_network.php">
+            <svg class="c-sidebar-nav-icon">
+              <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-sitemap"></use>
+              </svg> Netwerk</a></li>
+          <?php } ?>
 
           <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="page_power_planner.php">
             <svg class="c-sidebar-nav-icon">
@@ -97,7 +104,7 @@
           <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="page_modem_overview.php">
             <svg class="c-sidebar-nav-icon">
               <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-phone"></use>
-              </svg> Modem en SIM</a></li>             
+              </svg> Modem en SIM</a></li>
           <?php } ?>
 
           <?php if ( $_SESSION['client_role'] == 'admin'  ) { ?>
