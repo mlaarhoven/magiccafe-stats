@@ -22,12 +22,12 @@ const MS_NODE_W_MAX = 460;
 function ms_network_valid_types() {
     return array('router4g4p','router4g2p','router4p','modem4g','wifimodule','switch','ap',
                  'internet','venuelan','venuewifi',
-                 'pc','printer','payter','camera','screen','ledlight','outlet',
+                 'pc','printer','payter','camera','screen','hdmisplit','ledlight','outlet','relay',
                  'shelly','shellydim','shellydim2','shellyh','other');
 }
 
 function ms_network_valid_kinds() {
-    return array('utp','wifi','mobile','usb','power');
+    return array('utp','wifi','mobile','usb','power','hdmi','dp');
 }
 
 function ms_txt( $v, $max ) {

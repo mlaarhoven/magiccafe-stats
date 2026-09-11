@@ -301,8 +301,28 @@ function set_switch ( $event_id, $switch_nr, $switch_value )
     sleep(2);
 
     if ( isset ( $myData['error']) ) {
-        
+
         $error_code = $myData['error'];
+
+        # BAD_REQUEST niet loggen.
+        # cron_power_planner_cafekasten.php zet elke kast aan/uit met eerst kanaal 1 en
+        # daarna kanaal 0. Lang niet elke kast heeft een tweede kanaal in gebruik, en dan
+        # antwoordt de Shelly cloud met BAD_REQUEST. Dat is dus geen storing maar het
+        # bekende gevolg van die vaste volgorde: ~23 regels per dag, 955 sinds 01-08-2026.
+        # Bewust niet "opgelost" door kanaal 1 over te slaan bij apparaten met één relais:
+        # wat het apparaat kán zegt niets over wat er in die kast is aangesloten. Een kast
+        # met een 2-kanaals relais kan er prima maar één van gebruiken (en andersom gebruiken
+        # flora foto/video er wél twee), dus die afleiding zou er soms naast zitten en dan
+        # een kast niet meer schakelen. De aanroep blijft daarom staan zoals hij is.
+        #
+        # Het alarm gaat hier niet mee verloren: de cron controleert de uitkomst van
+        # kanaal 0 apart en mailt bij élke andere uitkomst dan 1 - ook bij BAD_REQUEST.
+        # Andere foutcodes (DEVICE_OFFLINE, DEVICE_FAILED_COMMAND, TOO_MANY_REQUESTS)
+        # worden hieronder gewoon gelogd; die zijn zeldzaam en zeggen wel iets.
+        if ( $error_code == 'BAD_REQUEST' ) {
+            return $myData['error'];
+        }
+
         # log error in log tabel
         $datetime 	 = date ("Y-m-d H:i:s");
         $ip 		 = $_SERVER['REMOTE_ADDR'];

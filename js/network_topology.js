@@ -32,8 +32,10 @@ var MSNet = (function () {
     payter:     { label: 'Betaalterminal',        group: 'Apparaten' },
     camera:     { label: 'Camera',                group: 'Apparaten' },
     screen:     { label: 'Scherm / tablet',       group: 'Apparaten' },
+    hdmisplit:  { label: 'HDMI splitter',         group: 'Apparaten' },
     ledlight:   { label: 'LED verlichting',       group: 'Apparaten' },
     outlet:     { label: 'Stopcontact',           group: 'Apparaten' },
+    relay:      { label: 'Relais (zwaar)',        group: 'Apparaten' },
     shelly:     { label: 'Shelly relais',         group: 'Shelly' },
     shellydim:  { label: 'Shelly dimmer',         group: 'Shelly' },
     shellydim2: { label: 'Shelly dimmer duo',     group: 'Shelly' },
@@ -42,7 +44,7 @@ var MSNet = (function () {
   };
   var TYPE_ORDER = ['router4g4p', 'router4g2p', 'router4p', 'modem4g', 'wifimodule', 'switch', 'ap',
                     'internet', 'venuelan', 'venuewifi',
-                    'pc', 'printer', 'payter', 'camera', 'screen', 'ledlight', 'outlet',
+                    'pc', 'printer', 'payter', 'camera', 'screen', 'hdmisplit', 'ledlight', 'outlet', 'relay',
                     'shelly', 'shellydim', 'shellydim2', 'shellyh', 'other'];
 
   /* 24x24 lijn-iconen, stroke = currentColor */
@@ -58,12 +60,14 @@ var MSNet = (function () {
     venuelan:   '<path d="M4 21V6l7-3v18"/><path d="M11 10h9v11"/><path d="M7 8h.01M7 12h.01M7 16h.01M15 14h.01M15 18h.01"/>',
     venuewifi:  '<path d="M4 21V9l7-3v15"/><path d="M14 21h6"/><path d="M14 12.5a5 5 0 0 1 7 0"/><path d="M16 15.5a2.5 2.5 0 0 1 3 0"/>',
     pc:         '<path d="M3 4h18v12H3z"/><path d="M9 20h6"/><path d="M12 16v4"/>',
-    printer:    '<path d="M7 8V3h10v5"/><path d="M4 8h16v8h-3"/><path d="M7 16H4"/><path d="M7 13h10v8H7z"/>',
+    printer:    '<path d="M7 8V3h10v5"/><path d="M4 8h16v8h-3"/><path d="M7 16H4V8"/><path d="M7 13h10v8H7z"/>',
     payter:     '<path d="M6 2h12v20H6z"/><path d="M8 5h8v5H8z"/><path d="M9 14h.01M12 14h.01M15 14h.01M9 18h.01M12 18h.01M15 18h.01"/>',
     camera:     '<path d="M2 7h5l2-3h6l2 3h5v13H2z"/><circle cx="12" cy="13" r="4"/>',
-    screen:     '<path d="M5 2h14v20H5z"/><path d="M10 19h4"/>',
+    screen:     '<rect x="1.5" y="5" width="21" height="14" rx="2"/><path d="M4 8h13.5v8H4z"/><path d="M20 12h.01"/>',
+    hdmisplit:  '<path d="M6 9h12v6H6z"/><path d="M2 12h4"/><path d="M18 12h2"/><path d="M20 12V6h2"/><path d="M20 12v6h2"/><path d="M9 12h.01M12 12h.01"/>',
     ledlight:   '<path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 2a6 6 0 0 0-3.5 10.9c.6.4 1 1.1 1 1.9v1.2h5v-1.2c0-.8.4-1.5 1-1.9A6 6 0 0 0 12 2z"/>',
     outlet:     '<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9.2" cy="12" r="1.2"/><circle cx="14.8" cy="12" r="1.2"/><path d="M12 6.5v1.4M12 16.1v1.4"/>',
+    relay:      '<rect x="2.5" y="4.5" width="19" height="15" rx="1.5"/><path d="M5.5 9h4v6h-4z"/><path d="M7.5 9V7M7.5 17v-2"/><path d="M13 15h.01M19 15h.01"/><path d="M13.3 14.7 18.7 11"/>',
     shelly:     '<path d="M4 6h16v12H4z"/><path d="M8 12h8"/><path d="M13 9l-3 6"/>',
     shellydim:  '<path d="M4 6h16v12H4z"/><path d="M7 12h10"/><circle cx="10" cy="12" r="2"/>',
     shellydim2: '<path d="M3 5h18v14H3z"/><path d="M6 10h12M6 15h12"/><circle cx="9" cy="10" r="1.8"/><circle cx="15" cy="15" r="1.8"/>',
@@ -77,9 +81,11 @@ var MSNet = (function () {
     wifi:   { label: 'WiFi',      color: '#e0a800', dash: '7 5',      width: 2.6 },
     mobile: { label: '4G / 5G',   color: '#d9534f', dash: '2 5',      width: 3.0 },
     usb:    { label: 'USB',       color: '#6f42c1', dash: '10 4 2 4', width: 2.4 },
-    power:  { label: '230V',      color: '#8a5a00', dash: '1 6',      width: 3.4 }
+    power:  { label: '230V',      color: '#8a5a00', dash: '1 6',      width: 3.4 },
+    hdmi:   { label: 'HDMI',      color: '#20a8d8', dash: '6 3 1 3', width: 2.6 },
+    dp:     { label: 'DisplayPort', color: '#4dbd74', dash: '4 3',   width: 2.6 }
   };
-  var KIND_ORDER = ['utp', 'wifi', 'mobile', 'usb', 'power'];
+  var KIND_ORDER = ['utp', 'wifi', 'mobile', 'usb', 'power', 'hdmi', 'dp'];
 
   /* ---------------- state ---------------- */
   var state = { nodes: [], edges: [], nextId: 1 };
@@ -490,14 +496,22 @@ var MSNet = (function () {
   }
 
   /* ---------------- eigenschappen-paneel ---------------- */
+  // Elk invoerveld draagt zelf bij welk element het hoort (data-owner). Zonder dat zou een
+  // change-event dat pas na het aanklikken van een ander element afgaat -- de browser vuurt dat
+  // pas bij het wegvallen van de focus, dus na onCanvasMouseDown -- de tekst in het inmiddels
+  // nieuw geselecteerde element schrijven.
+  function ownerAttr() {
+    return selection ? ' data-owner="' + esc(selection.kind + ':' + selection.id) + '"' : '';
+  }
   function fld(lab, prop, val, ph) {
     return '<div class="form-group mb-2"><label class="small mb-1">' + esc(lab) + '</label>' +
-           '<input type="text" class="form-control form-control-sm" data-prop="' + prop + '" value="' + esc(val) +
-           '" placeholder="' + esc(ph || '') + '"></div>';
+           '<input type="text" class="form-control form-control-sm" data-prop="' + prop + '"' + ownerAttr() +
+           ' value="' + esc(val) + '" placeholder="' + esc(ph || '') + '"></div>';
   }
   function area(lab, prop, val) {
     return '<div class="form-group mb-2"><label class="small mb-1">' + esc(lab) + '</label>' +
-           '<textarea class="form-control form-control-sm" rows="4" data-prop="' + prop + '">' + esc(val) + '</textarea></div>';
+           '<textarea class="form-control form-control-sm" rows="4" data-prop="' + prop + '"' + ownerAttr() +
+           '>' + esc(val) + '</textarea></div>';
   }
 
   function renderProps() {
@@ -529,7 +543,7 @@ var MSNet = (function () {
       var n = byId(selection.id);
       if (!n) { selectedIds = []; selection = null; renderProps(); return; }
       html += '<div class="form-group mb-2"><label class="small mb-1">Type</label>' +
-              '<select class="form-control form-control-sm" data-prop="type">';
+              '<select class="form-control form-control-sm" data-prop="type"' + ownerAttr() + '>';
       TYPE_ORDER.forEach(function (t) {
         html += '<option value="' + t + '"' + (t === n.type ? ' selected' : '') + '>' + esc(NODE_TYPES[t].label) + '</option>';
       });
@@ -544,7 +558,7 @@ var MSNet = (function () {
       html += '<p class="small text-muted mb-2"><strong>' + esc(a ? (a.label || typeLabel(a.type)) : '?') +
               '</strong> &rarr; <strong>' + esc(b ? (b.label || typeLabel(b.type)) : '?') + '</strong></p>';
       html += '<div class="form-group mb-2"><label class="small mb-1">Soort verbinding</label>' +
-              '<select class="form-control form-control-sm" data-prop="kind">';
+              '<select class="form-control form-control-sm" data-prop="kind"' + ownerAttr() + '>';
       KIND_ORDER.forEach(function (k) {
         html += '<option value="' + k + '"' + (k === e.kind ? ' selected' : '') + '>' + esc(EDGE_KINDS[k].label) + '</option>';
       });
@@ -560,14 +574,19 @@ var MSNet = (function () {
   }
 
   function onPropInput(ev) {
-    var prop = ev.target.getAttribute('data-prop');
-    if (!prop || !selection) { return; }
+    var prop  = ev.target.getAttribute('data-prop');
+    var owner = ev.target.getAttribute('data-owner');
+    if (!prop || !owner) { return; }
     // een <select> vuurt zowel input als change: één keer afhandelen
     if (ev.target.tagName === 'SELECT' && ev.type === 'input') { return; }
-    var obj = selection.kind === 'node' ? byId(selection.id) : edgeById(selection.id);
+    // altijd naar het element schrijven waar dit veld bij hoort, ook als de selectie
+    // inmiddels versprongen is
+    var sep  = owner.indexOf(':');
+    var kind = owner.slice(0, sep), id = owner.slice(sep + 1);
+    var obj  = kind === 'node' ? byId(id) : edgeById(id);
     if (!obj) { return; }
 
-    if (prop === 'type' && selection.kind === 'node') {
+    if (prop === 'type' && kind === 'node') {
       // standaardnaam mee laten veranderen zolang die niet handmatig is aangepast
       var wasDefault = TYPE_ORDER.some(function (t) { return NODE_TYPES[t].label === obj.label; });
       obj.type = ev.target.value;
@@ -989,6 +1008,7 @@ var MSNet = (function () {
       event_id:   els.eventId.value,
       base_ip:    els.baseIpInput.value,
       modem_type: els.modemTypeInput.value,
+      shelly_type: els.shellyTypeInput ? els.shellyTypeInput.value : '',
       note:       els.noteInput.value,
       nodes:      state.nodes,
       edges:      state.edges
@@ -1108,6 +1128,7 @@ var MSNet = (function () {
       event_id:   els.eventId.value,
       base_ip:    els.baseIpInput.value,
       modem_type: els.modemTypeInput.value,
+      shelly_type: els.shellyTypeInput ? els.shellyTypeInput.value : '',
       note:       els.noteInput.value,
       nodes:      state.nodes,
       edges:      state.edges
@@ -1127,6 +1148,7 @@ var MSNet = (function () {
           if (els.dirtyFlag) { els.dirtyFlag.style.display = 'none'; }
           els.baseIpView.textContent    = payload.base_ip || '—';
           els.modemTypeView.textContent = payload.modem_type || '—';
+          if (els.shellyTypeView) { els.shellyTypeView.textContent = payload.shelly_type || '—'; }
           els.noteView.textContent      = payload.note || '—';
           if (els.updatedView && res.updated) { els.updatedView.textContent = res.updated; }
           setEditMode(false);
@@ -1170,9 +1192,11 @@ var MSNet = (function () {
     els.eventName      = document.getElementById('msEventName');
     els.baseIpInput    = document.getElementById('msBaseIp');
     els.modemTypeInput = document.getElementById('msModemType');
+    els.shellyTypeInput= document.getElementById('msShellyType');
     els.noteInput      = document.getElementById('msNote');
     els.baseIpView     = document.getElementById('msBaseIpView');
     els.modemTypeView  = document.getElementById('msModemTypeView');
+    els.shellyTypeView = document.getElementById('msShellyTypeView');
     els.noteView       = document.getElementById('msNoteView');
     els.updatedView    = document.getElementById('msUpdatedView');
 
@@ -1262,7 +1286,7 @@ var MSNet = (function () {
       });
     }
 
-    [els.baseIpInput, els.modemTypeInput, els.noteInput].forEach(function (i) {
+    [els.baseIpInput, els.modemTypeInput, els.shellyTypeInput, els.noteInput].forEach(function (i) {
       if (i) { i.addEventListener('input', markDirty); }
     });
 

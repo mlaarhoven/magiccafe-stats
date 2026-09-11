@@ -46,6 +46,7 @@ if ( $topology_json === false ) {
 
 $base_ip    = mysqli_real_escape_string( $cn, ms_txt( isset($payload['base_ip'])    ? $payload['base_ip']    : '', 64 ) );
 $modem_type = mysqli_real_escape_string( $cn, ms_txt( isset($payload['modem_type']) ? $payload['modem_type'] : '', 128 ) );
+$shelly_type= mysqli_real_escape_string( $cn, ms_txt( isset($payload['shelly_type']) ? $payload['shelly_type'] : '', 128 ) );
 $note       = mysqli_real_escape_string( $cn, ms_txt( isset($payload['note'])       ? $payload['note']       : '', 8000 ) );
 $json_esc   = mysqli_real_escape_string( $cn, $topology_json );
 $client_id  = (int) $_SESSION['client_id'];
@@ -55,6 +56,7 @@ $sql = "INSERT INTO photobooth_network_topology
            SET event_id             = '" . $event_id  . "',
                base_ip              = '" . $base_ip   . "',
                modem_type           = '" . $modem_type. "',
+               shelly_type          = '" . $shelly_type. "',
                topology_note        = '" . $note      . "',
                topology_json        = '" . $json_esc  . "',
                updated_by_client_id = '" . $client_id . "',
@@ -62,6 +64,7 @@ $sql = "INSERT INTO photobooth_network_topology
         ON DUPLICATE KEY UPDATE
                base_ip              = VALUES(base_ip),
                modem_type           = VALUES(modem_type),
+               shelly_type          = VALUES(shelly_type),
                topology_note        = VALUES(topology_note),
                topology_json        = VALUES(topology_json),
                updated_by_client_id = VALUES(updated_by_client_id),

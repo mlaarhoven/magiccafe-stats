@@ -53,8 +53,8 @@ if ( $event_naam === '' ) {
 }
 
 # ---- opgeslagen configuratie ophalen ----
-$base_ip = ''; $modem_type = ''; $topology_note = ''; $topology_json = ''; $updated_txt = '';
-$sql = "SELECT t.base_ip, t.modem_type, t.topology_note, t.topology_json, t.topology_updated,
+$base_ip = ''; $modem_type = ''; $shelly_type = ''; $topology_note = ''; $topology_json = ''; $updated_txt = '';
+$sql = "SELECT t.base_ip, t.modem_type, t.shelly_type, t.topology_note, t.topology_json, t.topology_updated,
                c.client_name
           FROM photobooth_network_topology t
      LEFT JOIN photobooth_stat_client c ON c.client_id = t.updated_by_client_id
@@ -63,6 +63,7 @@ $result = mysqli_query( $cn, $sql );
 if ( $result && ( $row = $result->fetch_object() ) ) {
     $base_ip       = $row->base_ip;
     $modem_type    = $row->modem_type;
+    $shelly_type   = $row->shelly_type;
     $topology_note = (string) $row->topology_note;
     $topology_json = (string) $row->topology_json;
     if ( $row->topology_updated ) {
@@ -205,21 +206,28 @@ if ( $result && ( $row = $result->fetch_object() ) ) {
               <span id="msDirty" class="badge badge-warning mb-2" style="display:none">Niet-opgeslagen wijzigingen</span>
 
               <div class="row">
-                <div class="col-md-4">
+                <div class="col-md-3">
                   <label class="small text-muted mb-1">Basis IP adres (modem / router)</label>
                   <p class="ms-meta-view mb-3"><strong id="msBaseIpView"><?php echo $base_ip !== '' ? htmlspecialchars($base_ip) : '—'; ?></strong></p>
                   <input type="text" class="form-control form-control-sm mb-3 ms-meta-edit" id="msBaseIp"
                          style="display:none" placeholder="bv. 192.168.1.1"
                          value="<?php echo htmlspecialchars($base_ip); ?>">
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                   <label class="small text-muted mb-1">Modem type</label>
                   <p class="ms-meta-view mb-3"><strong id="msModemTypeView"><?php echo $modem_type !== '' ? htmlspecialchars($modem_type) : '—'; ?></strong></p>
                   <input type="text" class="form-control form-control-sm mb-3 ms-meta-edit" id="msModemType"
                          style="display:none" placeholder="bv. Teltonika RUT241"
                          value="<?php echo htmlspecialchars($modem_type); ?>">
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
+                  <label class="small text-muted mb-1">Shelly type (schakelaar)</label>
+                  <p class="ms-meta-view mb-3"><strong id="msShellyTypeView"><?php echo $shelly_type !== '' ? htmlspecialchars($shelly_type) : '—'; ?></strong></p>
+                  <input type="text" class="form-control form-control-sm mb-3 ms-meta-edit" id="msShellyType"
+                         style="display:none" placeholder="bv. Shelly Pro 1PM (SPSW-201PE16EU)"
+                         value="<?php echo htmlspecialchars($shelly_type); ?>">
+                </div>
+                <div class="col-md-3">
                   <label class="small text-muted mb-1">Modem gegevens uit de event tabel</label>
                   <p class="mb-3 small">
                     Serienummer: <strong><?php echo htmlspecialchars($modem_serial); ?></strong><br>
@@ -395,7 +403,11 @@ if ( $result && ( $row = $result->fetch_object() ) ) {
   </div>
 </div>
 
-<script src="js/network_topology.js"></script>
+<!-- ?v=filemtime: de server stuurt voor .js een Cache-Control van een jaar, dus zonder deze
+     parameter blijft elke browser de oude versie draaien na een wijziging. Dat is een keer
+     misgegaan (11-09-2026): de HTML kwam vers uit PHP en toonde het nieuwe veld, maar de
+     gecachete JS stuurde het niet mee, waarna de opslag het veld leegschreef. -->
+<script src="js/network_topology.js?v=<?php echo filemtime(__DIR__ . '/js/network_topology.js'); ?>"></script>
 <script>
   MSNet.init(<?php echo $topology_js; ?>);
 </script>
