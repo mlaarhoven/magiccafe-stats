@@ -151,7 +151,33 @@
                       <h2 class="text-white text-uppercase">Uitleg sets en specificaties</h2>
                     </div>
                     <div class="card-body">
-                        <div class="card-title"><h2>UITLEG</h2></div>
+                        <div class="card-title"><h2>HELE KORTE UITLEG STROOKJE MAKEN</h2></div>
+                        <ul>
+                          <li>Maak een nieuw plaatje aan met afmeting van exact: 2480 pixels hoog x3688 pixels breed</li>
+                          <li>Voeg een achtergrondkleur toe, van rand tot rand</li>
+                          <li>Plaats logo en/of tekstje onderaan. Plaats dit links en rechts.</li>
+                          <li>Sla het bestand op als PNG met de naam: <strong>strook.png</strong></li>
+                          <li>Maak een nieuwe Set (<a href="https://stats.magicshoot.nl/page_set_overview.php">Set overzicht</a>) aan en sleep dit plaatje naar: 'stroken'.</li>
+                          <li>Plan de set in met de set planner.</li>
+
+
+
+                        </ul>
+                        <h2>VOORBEELD</h2><p>Dit is hoe een strook.png eruit hoort te zien. Volledige achtergrondkleur, logo en text onderaan geplaatst.</p>
+                      <img src="/strook_templates/strook.png" alt="Strook voorbeeld" class="img-fluid" width="400"><br>
+<br>
+
+ <h2>VOORBEELD met testfotos en snijrand</h2>
+ <p>Plaats geen tekst of logo in het paarse gedeelte, dit kan eraf gesneden worden! <br>De plek van de foto's is vast. Dus geen logo bovenaan zetten!<br> Let op: dit is alleen een voorbeeldje, de echte strook.png moet geen randen en testfoto's bevatten (die hier boven staat is goed)!</p>
+                      <img src="/strook_templates/strook_met_testfotos_en_snijrand.png" alt="Strook voorbeeld" class="img-fluid" width="400"><br>
+<br>
+
+<p>Het is beter/handiger/mooier om de Photoshop template te gebruiken, die kan je downloaden bij het <a href="https://stats.magicshoot.nl/page_set_overview.php">Set overzicht</a>. <br>
+Daarin staan guides, snijlijnen en andere hulpmiddelen om het strookje correct op te maken.
+</p>
+<br><br>
+
+                        <div class="card-title"><h2>LANGE UITLEG</h2></div>
                         <h3>Wat is een Set?</h3>
                         <p>Een Set is een verzameling van alle plaatjes die nodig zijn om een fotostrip te maken.<br>
                            <ul>
@@ -161,7 +187,8 @@
                          
                             <strong>STROOK</strong>
                             <ul>
-                              <li><i>strook.png </i>(dat is het achtergrond plaatje)</li>
+                          <li>Maak een nieuw plaatje aan met afmeting van exact: 2480 pixels hoog x3688 pixels breed</li>
+                              <li><i>strook.png </i>(afmeting: 2480x3688 pixels) dat is het achtergrond plaatje. De foto's worden hier bovenop gezet.</li>
                               <li><i>strook_foreground.png</i> (standaard is dit een leeg, transparant plaatje)</li>
                             </ul>
                             <strong>PLAATJES</strong>
