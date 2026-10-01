@@ -79,6 +79,15 @@
               </svg> Netwerk</a></li>
           <?php } ?>
 
+          <?php // logviewer staat bewust buiten het $shelly_switch_only blok hieronder,
+                // anders verdwijnt hij zodra er een shelly-only kast geselecteerd is
+                if ( $_SESSION['client_role'] == 'admin' ) { ?>
+          <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="page_logviewer.php">
+            <svg class="c-sidebar-nav-icon">
+              <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-list"></use>
+              </svg> Logviewer</a></li>
+          <?php } ?>
+
           <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="page_power_planner.php">
             <svg class="c-sidebar-nav-icon">
               <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-calendar"></use>
@@ -101,10 +110,10 @@
           <?php } ?>
 
           <?php if ( $_SESSION['client_role'] == 'admin'  ) { ?>
-          <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="page_modem_overview.php">
+        <!--  <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="page_modem_overview.php">
             <svg class="c-sidebar-nav-icon">
               <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-phone"></use>
-              </svg> Modem en SIM</a></li>
+              </svg> Modem en SIM</a></li> -->
           <?php } ?>
 
           <?php if ( $_SESSION['client_role'] == 'admin'  ) { ?>
@@ -155,6 +164,10 @@
                       <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-bar-chart"></use>
                     </svg> Aantallen & Financieel </a></li>
               <?php if ( $_SESSION['client_role'] == 'admin' ) { ?>
+               <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="page_invoice_all.php">
+                    <svg class="c-sidebar-nav-icon">
+                      <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-euro"></use>
+                    </svg> Maandafrekening alle kasten </a></li>
                <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="page_total_verrekening_overview.php">
                     <svg class="c-sidebar-nav-icon">
                       <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-euro"></use>
@@ -193,6 +206,19 @@
 
 
 
+          <?php if ( $_SESSION['client_role'] == 'admin' ) {
+                // Campagne reacties (page_leads.php) — badge = aantal open (niet closed_*) reacties
+                $nav_open_leads = 0;
+                $nav_lq = mysqli_query($cn, "SELECT COUNT(*) FROM campaign_lead WHERE lead_status NOT IN ('closed_placed','closed_not_placed')");
+                if ($nav_lq) { $nav_open_leads = (int)$nav_lq->fetch_row()[0]; }
+          ?>
+             <li class="c-sidebar-nav-title">Acquisitie</li>
+                  <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="page_leads.php">
+                  <svg class="c-sidebar-nav-icon">
+                    <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-bullhorn"></use>
+                  </svg> Campagne reacties<?php if ($nav_open_leads > 0) { ?> <span class="badge badge-danger badge-pill ml-auto"><?php echo $nav_open_leads; ?></span><?php } ?></a></li>
+          <?php } ?>
+
              <li class="c-sidebar-nav-title">Support</li>
 
                   <?php
@@ -213,26 +239,15 @@
                     <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-task"></use>
                   </svg> Support Tickets<?php if ($nav_open_tickets > 0) { ?> <span class="badge badge-danger badge-pill ml-auto"><?php echo $nav_open_tickets; ?></span><?php } ?></a></li>
 
-                  <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="page_ticket_new.php">
-                  <svg class="c-sidebar-nav-icon">
-                    <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-plus"></use>
-                  </svg> Nieuw ticket</a></li>
-
-                  <?php if ($_SESSION['client_role'] === 'admin') { ?>
-                  <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="page_ticket_topics.php">
-                  <svg class="c-sidebar-nav-icon">
-                    <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-list"></use>
-                  </svg> Edit ticket subjects</a></li>
-                  <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="page_ticket_notify.php">
-                  <svg class="c-sidebar-nav-icon">
-                    <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-bell"></use>
-                  </svg> Notificaties</a></li>
-                  <?php } ?>
-
                   <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="page_support_printer.php">
                   <svg class="c-sidebar-nav-icon">
                     <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-print"></use>
                   </svg> Printer uitleg</a></li>
+
+                   <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="https://status.magicshoot.eu/" target="_blank">
+                  <svg class="c-sidebar-nav-icon">
+                    <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-wifi-signal-0"></use>
+                  </svg> Statuspagina</a></li>
 
                   <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="page_support.php">
                   <svg class="c-sidebar-nav-icon">

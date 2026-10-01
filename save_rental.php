@@ -14,8 +14,9 @@ if ( ! ( $_SESSION['client_role'] == 'admin') ) {
     header('Location: https://stats.magicshoot.nl/admin/index.php');
     exit;
   }    
-$event_id            = $_SESSION['event_id'];
-$set_sequence 		 = $_REQUEST['set_sequence'];
+# page_invoice_all.php stuurt het event_id mee (meerdere kasten op één pagina), anders de sessie
+$event_id            = isset( $_REQUEST['event_id'] ) ? (int)$_REQUEST['event_id'] : (int)$_SESSION['event_id'];
+$set_sequence 		 = (int)$_REQUEST['set_sequence'];
 $rental_boolean 	 = $_REQUEST['rental_boolean'];	
 
 # als er een record in de tabel: photobooth_sequence_rental staat, dan telt deze mee als verhuur en anders niet
