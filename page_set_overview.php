@@ -68,24 +68,6 @@
       //echo $sql;
     }
 
-  if ( $mode == 'generate_gifs' && $set_id != '' )
-    {
-      $eid = (int) $event_id;
-      $sid = (int) $set_id;
-      mysqli_query($cn, "DELETE FROM photobooth_gif_generator
-                          WHERE event_id = {$eid} AND set_id = {$sid} AND status = 'created'");
-      $animations = ['printen', 'startscherm', 'startscherm_qr', 'betalen', 'betalen_qr', 'pak_de_strookjes'];
-      $stmt = mysqli_prepare($cn,
-          "INSERT INTO photobooth_gif_generator (event_id, set_id, animation_name, status, created)
-           VALUES (?, ?, ?, 'created', NOW())");
-      foreach ($animations as $anim) {
-          mysqli_stmt_bind_param($stmt, 'iis', $eid, $sid, $anim);
-          mysqli_stmt_execute($stmt);
-      }
-      mysqli_stmt_close($stmt);
-    }
-
- 
 
   ?>
   <style>
@@ -262,35 +244,6 @@
                   <div class="card-header bg-facebook content-center">
                       <h2 class="text-white text-uppercase"> Set overzicht</h2>
                     </div>
-                    <?php
-                     // Feedback: show GIF generation status for this event (only not done)
-  $sql = "SELECT * FROM photobooth_gif_generator WHERE event_id = '" . $_SESSION['event_id'] . "' AND status != 'done' ORDER BY created DESC, set_id, animation_name";
-  $result_gifgen = mysqli_query($cn, $sql);
-  $gifgen_rows = [];
-  if ($result_gifgen) {
-    while ($row = mysqli_fetch_assoc($result_gifgen)) {
-      $gifgen_rows[] = $row;
-    }
-  }
-  if (count($gifgen_rows) > 0) {
-    echo '<div class="alert alert-info" style="margin: 20px 0 30px 0; font-size: 15px;">';
-    echo '<b>GIF generatie status voor dit event (nog niet klaar):</b><br>';
-    echo '<table style="width:100%; font-size:13px; background:#f8fafc; border-radius:8px; border:1px solid #cbd5e1; margin-top:8px;">';
-    echo '<tr style="background:#e2e8f0; font-weight:bold;"><td style="padding:4px 8px;">Set ID</td><td style="padding:4px 8px;">Animatie</td><td style="padding:4px 8px;">Status</td><td style="padding:4px 8px;">Aangemaakt</td></tr>';
-    foreach ($gifgen_rows as $row) {
-      echo '<tr>';
-      echo '<td style="padding:2px 8px;">' . htmlspecialchars($row['set_id']) . '</td>';
-      echo '<td style="padding:2px 8px;">' . htmlspecialchars($row['animation_name']) . '</td>';
-      echo '<td style="padding:2px 8px;">' . htmlspecialchars($row['status']) . '</td>';
-      echo '<td style="padding:2px 8px;">' . htmlspecialchars($row['created']) . '</td>';
-      echo '</tr>';
-    }
-    echo '</table>';
-    echo '<span style="font-size:12px; color:#64748b;">Let op: zolang er records met status <b>created</b> staan, is de gif generatie nog bezig.</span>';
-    echo '</div>';
-  }
-
-  ?>
                   <div class="card-body">
                     <p>Let op: als je op de knop drukt: "Gebruik deze set als basisset" dan wordt de prijs overgenomen van de huidige basisset.</p>
                     <a href="page_set_detail.php?mode=new" class="btn btn-info">Nieuwe set aanmaken</a>
@@ -371,8 +324,6 @@
                             if ( $is_base_set == 0 ) {
                               ?><br><a href="page_set_overview.php?mode=set_as_base&set_id=<?php echo $set_id; ?>" class="btn btn-danger">Gebruik deze set als basis set</a><br><?php
                             }
-                            ?><br><a href="page_set_overview.php?mode=generate_gifs&set_id=<?php echo $set_id; ?>" class="btn btn-warning">Genereer gif animaties</a><br><?php
-
                             ?>
                           </div>
                         </div>
