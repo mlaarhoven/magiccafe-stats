@@ -703,6 +703,39 @@ function get_device_status ( $event_id )
     return $return_array;
 }
 
+function get_software_version ( $event_id )
+{
+    // versie = eerste woord van log_details van de laatste 'Start' regel, bv "1.4.5.0 2-10-2026"
+    // FLORA VIDEO (35) logt onder event_id 5 (bekende fout in de software); event 5 wordt ook door
+    // andere bronnen gebruikt, dus daar filteren op log_source 'magicvideo'
+    global $cn;
+    global $timer;
+    $return_array = array();
+    $time = -microtime(true);
+    $event_id = (int) $event_id;
+    if ( $event_id == 35 ) {
+        $where = "event_id = 5 AND log_source = 'magicvideo'";
+    } else {
+        $where = "event_id = " . $event_id;
+    }
+    $sql       = "SELECT log_details, log_created
+                    FROM log
+                   WHERE " . $where . "
+                     AND log_action = 'Start'
+                ORDER BY log_id DESC
+                   LIMIT 1";
+    $result    = mysqli_query( $cn , $sql );
+    if ( $result && $result->num_rows > 0 ) {
+        $return       = mysqli_fetch_object ( $result );
+        $parts        = preg_split ( '/\s+/', trim ( $return->log_details ), 2 );
+        $return_array['version']     = $parts[0];
+        $return_array['build_date']  = isset ( $parts[1] ) ? $parts[1] : '';
+        $return_array['started']     = $return->log_created;
+    }
+    $timer[$event_id]['get_software_version'] = $time += microtime(true);
+    return $return_array;
+}
+
   # --- END FUNCTIONS --- #
   ?>
 
@@ -754,6 +787,15 @@ function get_device_status ( $event_id )
                                     $memcache->set($key, $device_status, $memcachetime); // Cache for x seconds
                                 }
                         # --- end device_status --- #
+
+                        # --- software_version (laatste 'Start' regel in log) --- #
+                            $key = "software_version-$event_id";
+                            $software_version = $memcache->get($key);
+                            if ($software_version === false || $mode == "force_refresh") {
+                                    $software_version = get_software_version ( $event_id );
+                                    $memcache->set($key, $software_version, $memcachetime); // Cache for x seconds
+                                }
+                        # --- end software_version --- #
                         if ( isset ($device_status['modem_heartbeat'] )){ $modem_heartbeat        = $device_status['modem_heartbeat'] ; } else { $modem_heartbeat = ""; }
                         if ( isset ($device_status['pc_heartbeat']))    { $pc_heartbeat           = $device_status['pc_heartbeat'];     } else { $pc_heartbeat = '';    }
 
@@ -1030,6 +1072,17 @@ function get_device_status ( $event_id )
                             </tr>
                         </thead>    
                         <tbody>
+                            <tr>
+                                <td><img src="/img/icons/cog-wheel.png" height="20"></td>
+                                <td>software</td>
+                                <?php if ( isset ( $software_version['version'] ) ) { ?>
+                                <td class="al-center" title="<?php echo htmlspecialchars ( 'build ' . $software_version['build_date'] . ' - laatste start ' . $software_version['started'] ); ?>"><?php echo htmlspecialchars ( $software_version['version'] ); ?></td>
+                                <td></td>
+                                <?php } else { ?>
+                                <td class="al-center">--</td>
+                                <td></td>
+                                <?php } ?>
+                            </tr>
                         <?php if ( $shelly_switch_only == 0 && !$is_minimal_setup ) { ?>
                         <tr>
                                 <td><img src="/img/icons/modem.png" height="20"></td>
