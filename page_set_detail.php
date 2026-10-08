@@ -11,7 +11,16 @@
   }
   $set_id   = mysqli_real_escape_string( $cn, $_REQUEST['set_id']);
   $mode     = mysqli_real_escape_string( $cn, $_REQUEST['mode']);
-  
+
+  // standaard UI-kleuren: gebruikt als een veld leeg is (nieuwe set, leeg opgeslagen, of geen photobooth_ui rij)
+  $ui_rgb_defaults = array(
+    'ui_circle_border_rgb'      => '0,162,232',
+    'ui_circle_fill_rgb'        => '0,0,0',
+    'ui_background_rgb'         => '0,0,0',
+    'ui_pricecircle_fill_rgb'   => '147,112,219',
+    'ui_pricecircle_border_rgb' => '255,255,255',
+    'ui_price_text_rgb'         => '255,255,255',
+  );
 
   if ( $mode == "save_set_name" )
   {
@@ -19,43 +28,26 @@
     $set_price_print      = mysqli_real_escape_string( $cn, $_REQUEST['set_price_print']);
     $set_price_qr         = mysqli_real_escape_string( $cn, $_REQUEST['set_price_qr']);
     $strip_layout_id      = mysqli_real_escape_string( $cn, $_REQUEST['strip_layout_id']);
-    $ui_circle_border_rgb      = mysqli_real_escape_string( $cn, $_REQUEST['ui_circle_border_rgb']      ?? '');
-    $ui_circle_fill_rgb        = mysqli_real_escape_string( $cn, $_REQUEST['ui_circle_fill_rgb']        ?? '');
-    $ui_background_rgb         = mysqli_real_escape_string( $cn, $_REQUEST['ui_background_rgb']         ?? '');
-    $ui_pricecircle_fill_rgb   = mysqli_real_escape_string( $cn, $_REQUEST['ui_pricecircle_fill_rgb']   ?? '');
-    $ui_pricecircle_border_rgb = mysqli_real_escape_string( $cn, $_REQUEST['ui_pricecircle_border_rgb'] ?? '');
-    $ui_price_text_rgb         = mysqli_real_escape_string( $cn, $_REQUEST['ui_price_text_rgb']         ?? '');
+
+    // kleurvelden staan alleen in het formulier voor admins; niet meegestuurd = bestaande waarde laten staan
+    $ui_set_sql = "";
+    foreach ( $ui_rgb_defaults as $ui_field => $ui_default ) {
+      if ( isset( $_REQUEST[$ui_field] ) ) {
+        $ui_value    = trim( $_REQUEST[$ui_field] );
+        $ui_set_sql .= ", " . $ui_field . " = '" . mysqli_real_escape_string( $cn, $ui_value !== '' ? $ui_value : $ui_default ) . "'";
+      }
+    }
 
     $sql = "UPDATE photobooth_set
                SET set_name                  = '" . $set_name                 . "',
                    set_price_print           = '" . $set_price_print          . "',
                    set_price_qr              = '" . $set_price_qr             . "',
-                   strip_layout_id           = '" . $strip_layout_id          . "',
-                   ui_circle_border_rgb      = '" . $ui_circle_border_rgb     . "',
-                   ui_circle_fill_rgb        = '" . $ui_circle_fill_rgb       . "',
-                   ui_background_rgb         = '" . $ui_background_rgb        . "',
-                   ui_pricecircle_fill_rgb   = '" . $ui_pricecircle_fill_rgb  . "',
-                   ui_pricecircle_border_rgb = '" . $ui_pricecircle_border_rgb . "',
-                   ui_price_text_rgb         = '" . $ui_price_text_rgb         . "'
+                   strip_layout_id           = '" . $strip_layout_id          . "'"
+                   . $ui_set_sql . "
              WHERE set_id = '" . $set_id . "'";
     $result      = mysqli_query( $cn , $sql );
     if ( $result ) {
       $set_name_opgeslagen = 1;
-
-      // Queue GIF regeneration for all animations (price may have changed)
-      $eid = (int) $event_id;
-      $sid = (int) $set_id;
-      mysqli_query($cn, "DELETE FROM photobooth_gif_generator
-                          WHERE event_id = {$eid} AND set_id = {$sid} AND status = 'created'");
-      $animations = ['printen', 'startscherm', 'startscherm_qr', 'betalen', 'betalen_qr', 'pak_de_strookjes'];
-      $stmt = mysqli_prepare($cn,
-          "INSERT INTO photobooth_gif_generator (event_id, set_id, animation_name, status, created)
-           VALUES (?, ?, ?, 'created', NOW())");
-      foreach ($animations as $anim) {
-          mysqli_stmt_bind_param($stmt, 'iis', $eid, $sid, $anim);
-          mysqli_stmt_execute($stmt);
-      }
-      mysqli_stmt_close($stmt);
     }
   }
 
@@ -70,12 +62,12 @@
     // Fetch UI colours for this event to copy into the new set
     $ui_result = mysqli_query($cn, "SELECT circle_border_rgb, circle_fill_rgb, background_rgb, pricecircle_fill_rgb, pricecircle_border_rgb, price_text_rgb FROM photobooth_ui WHERE event_id = '" . $event_id . "' LIMIT 1");
     $ui_row    = $ui_result ? mysqli_fetch_assoc($ui_result) : [];
-    $ui_circle_border_rgb      = mysqli_real_escape_string($cn, $ui_row['circle_border_rgb']      ?? '');
-    $ui_circle_fill_rgb        = mysqli_real_escape_string($cn, $ui_row['circle_fill_rgb']        ?? '');
-    $ui_background_rgb         = mysqli_real_escape_string($cn, $ui_row['background_rgb']         ?? '');
-    $ui_pricecircle_fill_rgb   = mysqli_real_escape_string($cn, $ui_row['pricecircle_fill_rgb']   ?? '');
-    $ui_pricecircle_border_rgb = mysqli_real_escape_string($cn, $ui_row['pricecircle_border_rgb'] ?? '');
-    $ui_price_text_rgb         = mysqli_real_escape_string($cn, $ui_row['price_text_rgb']         ?? '');
+    $ui_circle_border_rgb      = mysqli_real_escape_string($cn, ($ui_row['circle_border_rgb']      ?? '') ?: $ui_rgb_defaults['ui_circle_border_rgb']);
+    $ui_circle_fill_rgb        = mysqli_real_escape_string($cn, ($ui_row['circle_fill_rgb']        ?? '') ?: $ui_rgb_defaults['ui_circle_fill_rgb']);
+    $ui_background_rgb         = mysqli_real_escape_string($cn, ($ui_row['background_rgb']         ?? '') ?: $ui_rgb_defaults['ui_background_rgb']);
+    $ui_pricecircle_fill_rgb   = mysqli_real_escape_string($cn, ($ui_row['pricecircle_fill_rgb']   ?? '') ?: $ui_rgb_defaults['ui_pricecircle_fill_rgb']);
+    $ui_pricecircle_border_rgb = mysqli_real_escape_string($cn, ($ui_row['pricecircle_border_rgb'] ?? '') ?: $ui_rgb_defaults['ui_pricecircle_border_rgb']);
+    $ui_price_text_rgb         = mysqli_real_escape_string($cn, ($ui_row['price_text_rgb']         ?? '') ?: $ui_rgb_defaults['ui_price_text_rgb']);
 
     $sql	  = "INSERT INTO photobooth_set
         			    SET set_name              = 'Nieuwe set',
@@ -387,12 +379,12 @@ $resource_array   = array_diff( scandir ( $resource_path, 0 ) , array('..', '.',
             $set_price_qr          = $return->set_price_qr;
             $strip_layout_id       = $return->strip_layout_id;
             $is_base_set           = $return->is_base_set;
-            $ui_circle_border_rgb      = $return->ui_circle_border_rgb;
-            $ui_circle_fill_rgb        = $return->ui_circle_fill_rgb;
-            $ui_background_rgb         = $return->ui_background_rgb;
-            $ui_pricecircle_fill_rgb   = $return->ui_pricecircle_fill_rgb;
-            $ui_pricecircle_border_rgb = $return->ui_pricecircle_border_rgb;
-            $ui_price_text_rgb         = $return->ui_price_text_rgb;
+            $ui_circle_border_rgb      = $return->ui_circle_border_rgb      ?: $ui_rgb_defaults['ui_circle_border_rgb'];
+            $ui_circle_fill_rgb        = $return->ui_circle_fill_rgb        ?: $ui_rgb_defaults['ui_circle_fill_rgb'];
+            $ui_background_rgb         = $return->ui_background_rgb         ?: $ui_rgb_defaults['ui_background_rgb'];
+            $ui_pricecircle_fill_rgb   = $return->ui_pricecircle_fill_rgb   ?: $ui_rgb_defaults['ui_pricecircle_fill_rgb'];
+            $ui_pricecircle_border_rgb = $return->ui_pricecircle_border_rgb ?: $ui_rgb_defaults['ui_pricecircle_border_rgb'];
+            $ui_price_text_rgb         = $return->ui_price_text_rgb         ?: $ui_rgb_defaults['ui_price_text_rgb'];
 
             ?>
 
