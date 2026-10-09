@@ -90,9 +90,7 @@
                     }  
                     ?>
                     <script>
-                     function checkIfVerhuur(selectObject){
-                     
-                      let set_array = [
+                     var set_array = [
                         <?php
                         $sql =   "SELECT *
                                     FROM photobooth_set
@@ -110,40 +108,63 @@
                             ?>
                           
                       ];
-                      var set_id      = selectObject.value;  
-                      console.log ( " gekozen set_id = " + set_id );
-                      // loop the outer array
-                      for (let i = 0; i < set_array.length; i++) {
-                          // get the size of the inner array
-                          var innerArrayLength = set_array[i].length;
-                          // loop the inner array
-                          for (let j = 0; j < innerArrayLength; j++) {
-                              //console.log('[' + i + ',' + j + '] = ' + set_array[i][j]);
-                              if ( set_array[i][j] == set_id )
-                              {
-                                //console.log ( " set_price_print = " + set_array[i][1] );
-                                var set_price_print = set_array[i][1];
-                              }
 
-                          }
-                      }
-                      
-                      
-                      console.log ( " set_price_print = " + set_price_print );
-                      if ( set_price_print == 0)
+                     // verhuur set = set met losse verkoopprijs ( set_price_print ) 0
+                     function isVerhuurSet(set_id)
+                     {
+                        for (let i = 0; i < set_array.length; i++) {
+                          if ( set_array[i][0] == set_id ) { return set_array[i][1] == 0; }
+                        }
+                        return false;
+                     }
+
+                     function checkIfVerhuur(selectObject){
+                      var set_id      = selectObject.value;
+                      console.log ( " gekozen set_id = " + set_id );
+                      if ( isVerhuurSet(set_id) )
                       {
                         
-                        alert( "De gekozen set is een Verhuur set met losse verkoopprijs = 0 en tijdsduur 4 uur, zet de begintijd bijvoorbeeld op 19:00 en de eindtijd = 23:00. De afgesproken Verhuur prijs voor 4 uur wordt doorberekend aan de bar. ");
+                        alert( "De gekozen set is een Verhuur set met losse verkoopprijs = 0 en tijdsduur 4 uur, de eindtijd is automatisch op begintijd + 4 uur gezet. De afgesproken Verhuur prijs voor 4 uur wordt doorberekend aan de bar. ");
+                        setVerhuurEndTime();
+                      }
+                     }
+
+                     // verhuur set: eindtijd = begintijd + 4 uur (over middernacht → eind datum = volgende dag)
+                     function setVerhuurEndTime()
+                     {
                         var startTimeSelect = document.getElementById("start_time");
                         var endTimeSelect   = document.getElementById("end_time");
                         var endDateSelect   = document.getElementById("end_date");
-                        startTimeSelect.value  = "20:00:00";
-                        endTimeSelect.value    = "22:00:00";
-                        var startDate = "<?php echo $start_date; ?>";
-                        console.log( "start date=" + startDate );
-                        endDateSelect.value    = startDate; // eind datum is de startdatum
-                        
-                      }
+                        var startDate       = "<?php echo $start_date; ?>";
+
+                        var parts = startTimeSelect.value.split(":");
+                        var d = new Date(startDate + "T00:00:00");
+                        d.setHours(parseInt(parts[0], 10) + 4, parseInt(parts[1], 10), 0, 0);
+
+                        var pad     = function(n) { return ( n < 10 ? "0" : "" ) + n; };
+                        var endDate = d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+                        var endTime = pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":00";
+                        console.log( "verhuur eind = " + endDate + " " + endTime );
+
+                        // eind datum zetten en de eindtijd-lijst voor die datum opnieuw opbouwen
+                        endDateSelect.value = endDate;
+                        endDateChanged(endDateSelect);
+
+                        // de lijst voor de startdatum begint pas bij het oorspronkelijke tijdslot + 1 uur;
+                        // is de begintijd vervroegd en ontbreekt de eindtijd, voeg hem dan alsnog toe
+                        endTimeSelect.value = endTime;
+                        if ( endTimeSelect.value !== endTime )
+                        {
+                          endTimeSelect.add(new Option(endTime, endTime), 0);
+                          endTimeSelect.value = endTime;
+                        }
+                     }
+
+                     // begintijd gewijzigd terwijl er een verhuur set gekozen is → eindtijd meeschuiven
+                     function startTimeChanged()
+                     {
+                        var setSelect = document.getElementsByName("set_id")[0];
+                        if ( setSelect && isVerhuurSet(setSelect.value) ) { setVerhuurEndTime(); }
                      }
                       function endDateChanged(selectObject)
                       {
@@ -152,53 +173,29 @@
                         var end_time_hour ="<?php echo $end_time_hour;?>";
                         var endTimeSelect = document.getElementById("end_time");
                         var h = 0;
-                        var hour = 0;
+                        var start_h = 0;
+
+                        // verwijder eerst alle bestaande opties (48 per dag: hele en halve uren)
+                        endTimeSelect.options.length = 0;
 
                         if ( end_date == start_date )
                           {
                             // - als de end_date = start_date ligt dan toon je een select van de start_time + 1 uur tot 00:00 uur
                             console.log("end_date = start_date");
-
-                            // verwijder eerst bestaande opties
-                            for ( h = 0; h < 24; h ++)
-                            {
-                              endTimeSelect.remove('00:00:00');  
-                            }
-
-                            for ( h = end_time_hour; h < 24; h ++)
-                            {
-                              console.log ( "h=" + h);
-                              if ( h < 10 ) { hour = "0" + h + ":00:00"; } else { hour = h  + ":00:00";}
-
-                              var newOption = document.createElement("option");
-                              newOption.text = hour;
-                              endTimeSelect.add(newOption);
-                                  
-                            };
-
+                            start_h = parseInt(end_time_hour, 10);
                           }
                         else {
-                          // - als de end_date 1 dag na de start_date ligt dan kan je een end_time van 00:00 uur tot 23:00 uur tonen
+                          // - als de end_date 1 dag na de start_date ligt dan kan je een end_time van 00:00 uur tot 23:30 uur tonen
                           console.log("end_date > start_date");
-                        
-                          // verwijder eerst bestaande opties
-                          for ( h = 0; h < 24; h ++)
-                          {
-                            endTimeSelect.remove('00:00:00');  
-                          }
-                          
-                          
-                          
-                          for ( h = 0; h < 24; h ++)
-                          {
-                                if ( h < 10 ) { hour = "0" + h + ":00:00"; } else { hour = h  + ":00:00";}
+                          start_h = 0;
+                        }
 
-                                var newOption = document.createElement("option");
-                                newOption.text = hour;
-                                endTimeSelect.add(newOption);
-                                 
-                          };
-                        } 
+                        for ( h = start_h; h < 24; h ++)
+                        {
+                          var hh = ( h < 10 ) ? "0" + h : "" + h;
+                          endTimeSelect.add(new Option(hh + ":00:00", hh + ":00:00"));
+                          endTimeSelect.add(new Option(hh + ":30:00", hh + ":30:00"));
+                        }
                       }
                     </script>
                     <form action="page_set_planner.php" action="post">
@@ -213,7 +210,7 @@
                             <tr>
                                 <td><?php echo $start_date ; ?></td>
                                 <td>
-                                  <select name="start_time" id="start_time">
+                                  <select name="start_time" id="start_time" onChange="startTimeChanged()">
                                    <?php 
                                    for ( $h = 0; $h < 24; $h ++ ) {
                                       if ( $h < 10 )
