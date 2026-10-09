@@ -217,24 +217,168 @@ function check_if_planners_is_in_use() {
     border: 4px solid ;
     background: #f4f;
   }
+  /* drag-selectie: geen tekstselectie, en op touch geen scrollen zolang je in het raster sleept */
+  .table_planner {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      user-select: none;
+  }
+  .table_planner td.slot {
+      cursor: pointer;
+      touch-action: none;
+  }
+  .table_planner td.preview_on  { background: #8f8; box-shadow: inset 0 0 0 2px #060; }
+  .table_planner td.preview_off { background: #f88; box-shadow: inset 0 0 0 2px #600; }
+  .table_planner td.saving      { opacity: .5; }
 
 </style>
 
 
 <script>
-    function tdclick( day_of_week, start_time, end_time, power)
-        {
-            //console.log('td clicked day_of_week = ' + day_of_week + ' start_time= '+ start_time + ' end_time=' + end_time + ' power=' + power);
-            // toggle on to off and off to on
-            $.post( "save_power_setting.php",  { day_of_week: day_of_week, start_time:start_time, end_time:end_time, power:power}, function( data ) 
-                {
-                var obj = jQuery.parseJSON( data );
-                });
-                // reload window
-                location.reload();
-            
+// Power planner: sleep met de muis (of vinger) over de vakjes om een periode aan of uit te zetten.
+// Het eerste vakje bepaalt de richting: begin je op rood, dan wordt de hele selectie groen, en andersom.
+// De selectie is een rechthoek (dag x tijd) en wordt in één request opgeslagen via save_power_period.php.
+// Pointer Events + elementFromPoint werkt gelijk in Firefox, Chrome, Edge, Safari en op touch.
+$(function () {
+    var table = document.getElementById('power_planner_table');
+    if (!table) { return; }
 
+    var drag = null;   // { pointerId, anchor: {day, slot}, current: {day, slot}, power }
+    var busy = false;  // geen nieuwe drag zolang de vorige nog wordt opgeslagen
+
+    function cellAt(x, y) {
+        var el = document.elementFromPoint(x, y);
+        while (el && el !== table) {
+            if (el.tagName === 'TD' && el.classList.contains('slot')) { return el; }
+            el = el.parentNode;
         }
+        return null;
+    }
+
+    function pos(td) {
+        return { day: parseInt(td.getAttribute('data-day'), 10), slot: parseInt(td.getAttribute('data-slot'), 10) };
+    }
+
+    function range() {
+        return {
+            dayFrom:  Math.min(drag.anchor.day,  drag.current.day),
+            dayTo:    Math.max(drag.anchor.day,  drag.current.day),
+            slotFrom: Math.min(drag.anchor.slot, drag.current.slot),
+            slotTo:   Math.max(drag.anchor.slot, drag.current.slot)
+        };
+    }
+
+    function cellsIn(r) {
+        var out = [];
+        var cells = table.querySelectorAll('td.slot');
+        for (var i = 0; i < cells.length; i++) {
+            var p = pos(cells[i]);
+            if (p.day >= r.dayFrom && p.day <= r.dayTo && p.slot >= r.slotFrom && p.slot <= r.slotTo) {
+                out.push(cells[i]);
+            }
+        }
+        return out;
+    }
+
+    function showPreview() {
+        var old = table.querySelectorAll('td.preview_on, td.preview_off');
+        for (var i = 0; i < old.length; i++) { old[i].classList.remove('preview_on', 'preview_off'); }
+        var cls = drag.power === 1 ? 'preview_on' : 'preview_off';
+        var cells = cellsIn(range());
+        for (var j = 0; j < cells.length; j++) { cells[j].classList.add(cls); }
+    }
+
+    // halfuur-vak 0..47 -> "HH:MM:SS"; einde van een vak is 29:59 na de start (zoals in de tabel)
+    function slotTime(slot, isEnd) {
+        var secs = slot * 1800 + (isEnd ? 1799 : 0);
+        function pad(n) { return (n < 10 ? '0' : '') + n; }
+        return pad(Math.floor(secs / 3600)) + ':' + pad(Math.floor(secs % 3600 / 60)) + ':' + pad(secs % 60);
+    }
+
+    function finish(commit) {
+        if (!drag) { return; }
+        var d     = drag;
+        var r     = range();
+        var cells = cellsIn(r);
+        drag = null;
+        for (var i = 0; i < cells.length; i++) { cells[i].classList.remove('preview_on', 'preview_off'); }
+        if (!commit) { return; }
+
+        busy = true;
+        for (var j = 0; j < cells.length; j++) { cells[j].classList.add('saving'); }
+
+        $.ajax({
+            url: 'save_power_period.php',
+            method: 'POST',
+            dataType: 'json',
+            data: {
+                day_from:   r.dayFrom,
+                day_to:     r.dayTo,
+                start_time: slotTime(r.slotFrom, false),
+                end_time:   slotTime(r.slotTo, true),
+                power:      d.power
+            }
+        }).done(function (res) {
+            if (!res || !res.ok) {
+                alert('Opslaan mislukt' + (res && res.error ? ': ' + res.error : '') + '. Er is niets gewijzigd.');
+                return;
+            }
+            for (var k = 0; k < cells.length; k++) {
+                cells[k].classList.toggle('power_on',  d.power === 1);
+                cells[k].classList.toggle('power_off', d.power === 0);
+                cells[k].setAttribute('data-power', d.power);
+            }
+        }).fail(function (xhr) {
+            var msg = (xhr.responseJSON && xhr.responseJSON.error) ? xhr.responseJSON.error : ('HTTP ' + xhr.status);
+            alert('Opslaan mislukt (' + msg + '). Er is niets gewijzigd; ververs de pagina en probeer opnieuw.');
+        }).always(function () {
+            for (var k = 0; k < cells.length; k++) { cells[k].classList.remove('saving'); }
+            busy = false;
+        });
+    }
+
+    table.addEventListener('pointerdown', function (e) {
+        if (busy || drag) { return; }
+        if (e.pointerType === 'mouse' && e.button !== 0) { return; }
+        var td = cellAt(e.clientX, e.clientY);
+        if (!td) { return; }
+        e.preventDefault(); // voorkomt tekstselectie / native drag (Firefox)
+        var p = pos(td);
+        drag = {
+            pointerId: e.pointerId,
+            anchor:  p,
+            current: p,
+            power:   td.getAttribute('data-power') === '1' ? 0 : 1
+        };
+        try { table.setPointerCapture(e.pointerId); } catch (err) {}
+        showPreview();
+    });
+
+    table.addEventListener('pointermove', function (e) {
+        if (!drag || e.pointerId !== drag.pointerId) { return; }
+        var td = cellAt(e.clientX, e.clientY);
+        if (!td) { return; } // buiten het raster: selectie blijft op het laatste vakje staan
+        var p = pos(td);
+        if (p.day !== drag.current.day || p.slot !== drag.current.slot) {
+            drag.current = p;
+            showPreview();
+        }
+    });
+
+    table.addEventListener('pointerup', function (e) {
+        if (drag && e.pointerId === drag.pointerId) { finish(true); }
+    });
+    table.addEventListener('pointercancel', function (e) {
+        if (drag && e.pointerId === drag.pointerId) { finish(false); }
+    });
+    table.addEventListener('lostpointercapture', function (e) {
+        if (drag && e.pointerId === drag.pointerId) { finish(true); }
+    });
+    table.addEventListener('dragstart', function (e) { e.preventDefault(); });
+    document.addEventListener('keydown', function (e) {
+        if (drag && (e.key === 'Escape' || e.key === 'Esc')) { finish(false); }
+    });
+});
 </script>
     <div class="c-subheader px-3">
       <!-- Breadcrumb-->
@@ -336,8 +480,8 @@ function check_if_planners_is_in_use() {
                         
                       
                     <h2>Planning</h2>
-                    <p>groen = aan, rood = uit. Klik op een vakje om te wisselen tussen aan of uit.<br>Let op: de week start op <strong>zondag</strong>!</p>
-                    <table class="table_planner">
+                    <p>groen = aan, rood = uit. Klik op een vakje, of sleep over meerdere vakjes (ook over meerdere dagen), om ze aan of uit te zetten. Begin je op een rood vakje, dan wordt de hele selectie groen, en andersom. Esc tijdens het slepen annuleert.<br>Let op: de week start op <strong>zondag</strong>!</p>
+                    <table class="table_planner" id="power_planner_table">
                         <tr>
                             <td><strong>starttijd</strong></td>
                             <td><strong>zondag<strong></td>
@@ -370,10 +514,7 @@ function check_if_planners_is_in_use() {
                                     for ( $day_of_week = 0; $day_of_week < 7; $day_of_week ++ )
                                         {
                                         $power = $day_array[$day_of_week][$start_time2][$end_time2];
-                                        if ( $power == 0 ) { $new_power = 1; }
-                                        if ( $power == 1 ) { $new_power = 0; }
-                                        $vars             = '"' . $day_of_week . '","' . $start_time2 .'","' .$end_time2 . '","' . $new_power . '"';
-                                        $current_time     = time();
+                                        $current_time    = time();
                                         $start_date_time  = strtotime ( date("Y") . "-" . date("m") . "-" . date("d") . " " . $start_time2);
                                         $end_date_time    = strtotime ( date("Y") . "-" . date("m") . "-" . date("d") . " " . $end_time2 );
                                         $day_of_week_now  = date('w') ;  
@@ -384,8 +525,8 @@ function check_if_planners_is_in_use() {
                                           $border_current_time = "1";
                                         }
 
-                                        if ( $power == 1 ) {?><td class="power_on"  style="border: <?php echo $border_current_time; ?>px solid #000;"  onclick='tdclick(<?php echo $vars; ?>)';></td><?php }
-                                        if ( $power == 0 ) {?><td class="power_off" style="border: <?php echo $border_current_time; ?>px solid #000;"  onclick='tdclick(<?php echo $vars; ?>)';></td><?php }
+                                        $power_class = ( $power == 1 ) ? 'power_on' : 'power_off';
+                                        ?><td class="slot <?php echo $power_class; ?>" data-day="<?php echo $day_of_week; ?>" data-slot="<?php echo $part; ?>" data-power="<?php echo ( $power == 1 ) ? 1 : 0; ?>" style="border: <?php echo $border_current_time; ?>px solid #000;"></td><?php
                                         }
                                     ?>
                                 </tr>    
