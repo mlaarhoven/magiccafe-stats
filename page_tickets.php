@@ -62,6 +62,16 @@ while ($row = $result->fetch_object()) {
           <svg class="c-icon mr-1"><use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-plus"></use></svg>
           Nieuw ticket
         </a>
+        <?php if ($_SESSION['client_role'] === 'admin') { ?>
+        <a href="page_ticket_topics.php" class="btn btn-secondary btn-sm ml-2">
+          <svg class="c-icon mr-1"><use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-list"></use></svg>
+          Edit ticket subjects
+        </a>
+        <a href="page_ticket_notify.php" class="btn btn-secondary btn-sm ml-2">
+          <svg class="c-icon mr-1"><use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-bell"></use></svg>
+          Notificaties
+        </a>
+        <?php } ?>
       </div>
     </div>
   </header>
