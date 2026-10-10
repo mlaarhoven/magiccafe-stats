@@ -80,6 +80,10 @@
                         
                         </tbody>
                       </table>
+
+
+                      <h2> Modem Remote beheer via RMS Teltonika</h2>
+                      <p>Ga naar: <a href="https://rms.teltonika-networks.com/management/devices">RMS Teltonika</a></p>
                       <h2>Reboot modem op afstand</h2>
                       <p>Alleen een medewerker van MagicShoot kan het modem rebooten (vanaf nummer +31621220846).</p>
                       <p>SMS:<br>
