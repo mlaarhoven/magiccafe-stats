@@ -38,6 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['mode'] ?? '') === 'new_lea
     $email_raw   = trim($_POST['contact_email'] ?? '');
     $venue_raw   = trim($_POST['venue_name']    ?? '');
     $city_raw    = trim($_POST['venue_city']    ?? '');
+    $url_clean   = lead_clean_url($_POST['venue_url'] ?? '');
     $desc_raw    = lead_clean_text($_POST['lead_description'] ?? '');
 
     if (!in_array($campaign_id, $campaign_ids, true)) {
@@ -50,12 +51,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['mode'] ?? '') === 'new_lea
         $error = 'Vul een telefoonnummer of e-mailadres in (minstens één van de twee).';
     } elseif ($email_raw !== '' && !filter_var($email_raw, FILTER_VALIDATE_EMAIL)) {
         $error = 'Het e-mailadres lijkt niet te kloppen.';
+    } elseif ($url_clean === false) {
+        $error = 'De website van de venue lijkt niet te kloppen.';
     } else {
         $name  = mysqli_real_escape_string($cn, $name_raw);
         $phone = $phone_raw === '' ? 'NULL' : "'" . mysqli_real_escape_string($cn, $phone_raw) . "'";
         $email = $email_raw === '' ? 'NULL' : "'" . mysqli_real_escape_string($cn, $email_raw) . "'";
         $venue = mysqli_real_escape_string($cn, $venue_raw);
         $city  = $city_raw === '' ? 'NULL' : "'" . mysqli_real_escape_string($cn, $city_raw) . "'";
+        $url   = $url_clean === '' ? 'NULL' : "'" . mysqli_real_escape_string($cn, $url_clean) . "'";
         $desc  = mysqli_real_escape_string($cn, $desc_raw);
 
         $ok = mysqli_query($cn, "INSERT INTO campaign_lead SET
@@ -66,6 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['mode'] ?? '') === 'new_lea
                 lead_channel         = '$channel',
                 venue_name           = '$venue',
                 venue_city           = $city,
+                venue_url            = $url,
                 lead_description     = '$desc',
                 lead_status          = 'new',
                 created_by_client_id = '$client_id',
@@ -180,6 +185,12 @@ function lead_old($key) { return htmlspecialchars($_POST[$key] ?? ''); }
                         <input type="text" id="venue_city" name="venue_city" class="form-control" maxlength="100"
                                value="<?php echo lead_old('venue_city'); ?>">
                       </div>
+                    </div>
+
+                    <div class="form-group">
+                      <label for="venue_url"><strong>Website venue</strong></label>
+                      <input type="text" id="venue_url" name="venue_url" class="form-control" maxlength="255" inputmode="url"
+                             placeholder="bijv. www.cafedehoek.nl of instagram.com/cafedehoek" value="<?php echo lead_old('venue_url'); ?>">
                     </div>
 
                     <div class="form-group">

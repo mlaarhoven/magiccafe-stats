@@ -100,3 +100,19 @@ function lead_clean_text($text) {
     $text = str_replace(["\\r", "\\n"], "\n", $text);
     return trim(str_replace(["\r\n", "\r"], "\n", $text));
 }
+
+// Website van de venue: leeg → '', zonder schema → https:// ervoor, alleen http(s).
+// Geeft false bij een ongeldige URL (de aanroeper toont dan een foutmelding).
+function lead_clean_url($url) {
+    $url = trim((string)$url);
+    if ($url === '') return '';
+    if (!preg_match('~^[a-z][a-z0-9+.-]*://~i', $url)) $url = 'https://' . $url;
+    if (!filter_var($url, FILTER_VALIDATE_URL)) return false;
+    $scheme = strtolower((string)parse_url($url, PHP_URL_SCHEME));
+    return in_array($scheme, ['http', 'https'], true) ? $url : false;
+}
+
+// Korte weergave van de URL (zonder schema, www. en afsluitende slash)
+function lead_url_label($url) {
+    return rtrim(preg_replace('~^https?://(www\.)?~i', '', (string)$url), '/');
+}

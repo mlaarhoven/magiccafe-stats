@@ -184,6 +184,7 @@ switch ($action) {
             'contact_email'    => trim((string)($_POST['contact_email'] ?? '')),
             'venue_name'       => trim((string)($_POST['venue_name']    ?? '')),
             'venue_city'       => trim((string)($_POST['venue_city']    ?? '')),
+            'venue_url'        => lead_clean_url($_POST['venue_url'] ?? ''),
             'lead_description' => lead_clean_text($_POST['lead_description'] ?? ''),
         ];
         $chk = mysqli_query($cn, "SELECT campaign_id FROM campaign WHERE campaign_id = '{$new['campaign_id']}'");
@@ -202,13 +203,16 @@ switch ($action) {
         if ($new['contact_email'] !== '' && !filter_var($new['contact_email'], FILTER_VALIDATE_EMAIL)) {
             echo json_encode(['success' => false, 'error' => 'Het e-mailadres lijkt niet te kloppen']); exit;
         }
+        if ($new['venue_url'] === false) {
+            echo json_encode(['success' => false, 'error' => 'De website van de venue lijkt niet te kloppen']); exit;
+        }
 
         $field_labels = [
             'campaign_id' => 'campagne', 'lead_channel' => 'kanaal', 'contact_name' => 'naam',
             'contact_phone' => 'telefoon', 'contact_email' => 'e-mail', 'venue_name' => 'venue',
-            'venue_city' => 'plaats', 'lead_description' => 'beschrijving',
+            'venue_city' => 'plaats', 'venue_url' => 'website', 'lead_description' => 'beschrijving',
         ];
-        $nullable = ['contact_phone', 'contact_email', 'venue_city'];
+        $nullable = ['contact_phone', 'contact_email', 'venue_city', 'venue_url'];
         $sets     = [];
         $changed  = [];
         foreach ($new as $f => $val) {

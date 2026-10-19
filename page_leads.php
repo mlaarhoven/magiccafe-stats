@@ -40,7 +40,7 @@ if ($campagne_param === 'alle') {
 
 $leads = [];
 $res = mysqli_query($cn, "SELECT l.lead_id, l.contact_name, l.contact_phone, l.contact_email, l.lead_channel,
-                                 l.venue_name, l.venue_city, l.lead_status, l.venue_score,
+                                 l.venue_name, l.venue_city, l.venue_url, l.lead_status, l.venue_score,
                                  l.lead_created, c.campaign_name
                             FROM campaign_lead l
                        LEFT JOIN campaign c ON c.campaign_id = l.campaign_id
@@ -205,6 +205,11 @@ $conversie = $totaal > 0 ? round($geplaatst / $totaal * 100) : 0;
                     <td>
                       <?php echo htmlspecialchars($l->venue_name); ?>
                       <?php if ($l->venue_city) { ?><div class="small text-muted"><?php echo htmlspecialchars($l->venue_city); ?></div><?php } ?>
+                      <?php if ($l->venue_url) { ?>
+                        <div class="small" onclick="event.stopPropagation()">
+                          <a href="<?php echo htmlspecialchars($l->venue_url); ?>" target="_blank" rel="noopener"><?php echo htmlspecialchars(lead_url_label($l->venue_url)); ?></a>
+                        </div>
+                      <?php } ?>
                     </td>
                     <td><?php echo lead_badge($kl['label'], $kl['color']); ?></td>
                     <td class="text-muted"><?php echo htmlspecialchars($l->campaign_name ?? '—'); ?></td>

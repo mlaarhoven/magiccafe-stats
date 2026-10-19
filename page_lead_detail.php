@@ -191,6 +191,12 @@ include("partial_nav.php");
                   <a href="mailto:<?php echo htmlspecialchars($lead->contact_email); ?>"><?php echo htmlspecialchars($lead->contact_email); ?></a>
                 </span>
                 <?php } ?>
+                <?php if ($lead->venue_url) { ?>
+                <span>
+                  <svg class="c-icon"><use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-globe-alt"></use></svg>
+                  <a href="<?php echo htmlspecialchars($lead->venue_url); ?>" target="_blank" rel="noopener"><?php echo htmlspecialchars(lead_url_label($lead->venue_url)); ?></a>
+                </span>
+                <?php } ?>
                 <span>
                   <svg class="c-icon"><use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-bullhorn"></use></svg>
                   <strong>Campagne:</strong> <?php echo htmlspecialchars($lead->campaign_name ?? '—'); ?>
@@ -402,6 +408,7 @@ include("partial_nav.php");
                       'contact_email' => 'E-mail',
                       'venue_name'    => 'Venue',
                       'venue_city'    => 'Plaats',
+                      'venue_url'     => 'Website venue',
                   ];
                   foreach ($edit_fields as $f => $lbl) { ?>
                   <div class="form-group mb-2">
@@ -474,7 +481,7 @@ function submitAction(action) {
         data.message    = document.getElementById('status-message').value.trim();
     } else if (action === 'edit_lead') {
         ['campaign_id', 'lead_channel', 'contact_name', 'contact_phone', 'contact_email',
-         'venue_name', 'venue_city', 'lead_description'].forEach(function(f) {
+         'venue_name', 'venue_city', 'venue_url', 'lead_description'].forEach(function(f) {
             data[f] = document.getElementById('edit-' + f).value.trim();
         });
     }
