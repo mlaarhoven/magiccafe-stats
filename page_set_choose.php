@@ -224,10 +224,10 @@
                                       }
                                       
                                       ?><option value="<?php echo $option_1; ?>"
-                                        <? if ( $option_1 == $start_time ) { echo " selected"; } ?>
+                                        <?php if ( $option_1 == $start_time ) { echo " selected"; } ?>
                                         ><?php echo $option_1; ?></option>
                                         <option value="<?php echo $option_2; ?>"
-                                        <? if ( $option_2 == $start_time ) { echo " selected"; } ?>
+                                        <?php if ( $option_2 == $start_time ) { echo " selected"; } ?>
                                         ><?php echo $option_2; ?></option>
                                         <?php
                                         }
@@ -244,7 +244,7 @@
                                     $end_date_option =  date ("Y-m-d", strtotime( "+ $d day", strtotime($end_date_time)));
 
                                     ?><option value="<?php echo $end_date_option; ?>"
-                                        <? if ( $end_date_option == $end_date ) { echo " selected"; } ?>
+                                        <?php if ( $end_date_option == $end_date ) { echo " selected"; } ?>
                                         ><?php echo $end_date_option; ?></option><?php
                                         }
                                     ?>
@@ -273,11 +273,11 @@
                                       }
                                       
                                       ?><option value="<?php echo $option_1; ?>"
-                                        <? if ( $option_1 == $end_time ) { echo " selected"; } ?>
+                                        <?php if ( $option_1 == $end_time ) { echo " selected"; } ?>
                                         ><?php echo $option_1; ?></option>
 
                                         <option value="<?php echo $option_2; ?>"
-                                        <? if ( $option_2 == $end_time ) { echo " selected"; } ?>
+                                        <?php if ( $option_2 == $end_time ) { echo " selected"; } ?>
                                         ><?php echo $option_2; ?></option>
                                         
                                         
@@ -304,7 +304,7 @@
                                     $set_name           = $return->set_name;
                                     $is_base_set        = $return->is_base_set;
                                     ?><option value="<?php echo $set_id; ?>"
-                                    <? if ( $set_id == $set_id_stored ) { echo " selected"; } ?>
+                                    <?php if ( $set_id == $set_id_stored ) { echo " selected"; } ?>
                                     ><?php echo $set_name . " - " . $set_id; ?></option><?php
                                     }
                                 ?>

@@ -155,7 +155,7 @@
                             <td><?php echo $button_foto_eind; ?></td>
                             <td><?php echo $print_start; ?></td>
                             <td><?php echo $print_klaar; ?></td>
-                            <td><?php echo $upload_ok; ?><br><strong><? echo $filehash; ?></strong></td>
+                            <td><?php echo $upload_ok; ?><br><strong><?php echo $filehash; ?></strong></td>
                             <td><?php echo $qr_scan_result; ?></td>
                             <td><?php echo $download_aantal; ?></td>
                             <td><?php echo $sessie_einde; ?></td>

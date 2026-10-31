@@ -1186,7 +1186,7 @@ function get_software_version ( $event_id )
                                 <td class="al-center"><span class="statustext <?php echo $class_test_mode; ?>"><?php echo $state_text_test_mode; ?></span></td>
 
                                 <td></td>
-                            </tr><? } ?>
+                            </tr><?php } ?>
                             <?php } ?>
                             <?php if ( !$is_minimal_setup ) { ?>
                             <tr>

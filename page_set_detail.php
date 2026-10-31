@@ -426,7 +426,7 @@ $resource_array   = array_diff( scandir ( $resource_path, 0 ) , array('..', '.',
                         <?php
                       } ?>
 
-                      <? if ( $is_base_set == 1 )
+                      <?php if ( $is_base_set == 1 )
                         {
                         ?>
                         Naam van de set: <strong><?php echo $set_name; ?></strong><br><br>
@@ -542,12 +542,12 @@ $resource_array   = array_diff( scandir ( $resource_path, 0 ) , array('..', '.',
                           {
                           ?>
                           <div class="two_image_container">
-                              <div class="image_container_high"><?
+                              <div class="image_container_high"><?php
                               echo '<div class="img_filename">' . $resource_img_with_ext . '</div>';
                               echo "<img src='https://www.magicshoot.nl/stats/thumbnail.php?path=" . $resource_path . "&img="  . $resource_img_with_ext . "&event_id=". $event_id . "&width=200&height=200&maxw=200&maxh=200'><br>";
                               echo '<a onClick="deleteImageFile(' . "'resources','" . $resource_img_with_ext ."'," .  $event_id . "," . $set_id . ')"><img src="assets/icons/trash.svg" class="image_icon_small last"></a>'; 
                               ?></div>	
-                          </div><?	
+                          </div><?php
                           } 
                       }
                     ?>  
@@ -590,12 +590,12 @@ $resource_array   = array_diff( scandir ( $resource_path, 0 ) , array('..', '.',
                           ?>
                           <div class="two_image_container">
                             
-                            <div class="image_container"><?
+                            <div class="image_container"><php
                               echo '<div class="img_filename">' . $background_img_with_ext . '</div>';
                               echo "<img src='https://www.magicshoot.nl/stats/thumbnail.php?path=" . $background_path . "&img="  . $background_img_with_ext . "&event_id=". $event_id . "&width=180&height=180&maxw=180&maxh=180'><br>";
                               echo '<a onClick="deleteImageFile(' . "'backgrounds','" . $background_img_with_ext ."'," .  $event_id . "," . $set_id . ')"><img src="assets/icons/trash.svg" class="image_icon_small last"></a>'; 
                             ?></div>	
-                            <div class="image_container"><?
+                            <div class="image_container"><?php
                             if ( is_file ( $foreground_img ) )
                               {
                               echo "<img src='https://www.magicshoot.nl/stats/thumbnail.php?path=" . $foreground_path . "&img="  . $foreground_img_with_ext . "&event_id=". $event_id . "&width=180&height=180&maxw=180&maxh=180'>";
@@ -608,7 +608,7 @@ $resource_array   = array_diff( scandir ( $resource_path, 0 ) , array('..', '.',
                               }
                             ?></div>
                             
-                          </div><?	
+                          </div><?php
                         }
                     ?>
                     </div>
@@ -641,12 +641,12 @@ $resource_array   = array_diff( scandir ( $resource_path, 0 ) , array('..', '.',
                           ?>
                           <div class="two_image_container">
                             
-                              <div class="image_container"><?
+                              <div class="image_container"><?php
                               echo '<div class="img_filename">' . $resource_img_with_ext . '</div>';
                               echo "<img src='https://www.magicshoot.nl/stats/thumbnail.php?path=" . $resource_path . "&img="  . $resource_img_with_ext . "&event_id=". $event_id . "&width=160&height=160&maxw=160&maxh=160'><br>";
                               echo '<a onClick="deleteImageFile(' . "'resources','" . $resource_img_with_ext ."'," .  $event_id . "," . $set_id . ')"><img src="assets/icons/trash.svg" class="image_icon_small last"></a>'; 
                               ?></div>	
-                          </div><?	
+                          </div><?php
                           } 
                       }
                     ?>

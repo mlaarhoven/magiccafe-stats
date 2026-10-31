@@ -145,7 +145,7 @@
                             for ( $y = 2023; $y < 2060; $y ++ )
                             {
                               ?><option value="<?php echo $y; ?>"
-                              <? if ( $y == $year ) { echo " selected"; } ?>
+                              <?php if ( $y == $year ) { echo " selected"; } ?>
                               ><?php echo $y; ?></option><?php
                             }
                             ?>

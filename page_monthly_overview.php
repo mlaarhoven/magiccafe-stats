@@ -148,7 +148,7 @@
                             for ( $y = 2023; $y < 2060; $y ++ )
                             {
                               ?><option value="<?php echo $y; ?>"
-                              <? if ( $y == $year ) { echo " selected"; } ?>
+                              <?php if ( $y == $year ) { echo " selected"; } ?>
                               ><?php echo $y; ?></option><?php
                             }
                             ?>
@@ -164,7 +164,7 @@
                            /* for ( $m = 1; $m <= 12; $m ++ )
                             {
                               ?><option value="<?php echo $m; ?>"
-                              <? if ( $m == $month ) { echo " selected"; } ?>
+                              <?php if ( $m == $month ) { echo " selected"; } ?>
                               ><?php echo $m; ?></option><?php
                             } */
                             ?>

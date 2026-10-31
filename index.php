@@ -110,20 +110,20 @@ if ( $mode == 'login' )
     <div class="container">
       <div class="row justify-content-center">
         <div class="col-sm-8 md-5">
-            <?
+            <?php
             // als je hier komt ben je dus niet geredirect en kan je het inlogscherm tonen
             login(); 
 
             if ( $mode == 'login' && inloggen() == false)
               {
-              ?><div class="alert alert-danger" role="alert">Het inloggen is niet gelukt, controleer uw e-mailadres en wachtwoord.</div><?
+              ?><div class="alert alert-danger" role="alert">Het inloggen is niet gelukt, controleer uw e-mailadres en wachtwoord.</div><?php
               }
 
            if ( isset ( $_SESSION['client_id']) )
               {
               if ( $_SESSION['client_id'] > 0 ) 
                 {
-                ?><div class="alert alert-success" role="alert">U bent al ingelogd. Klik <a href="https://stats.magicshoot.nl/page_dashboard_fast.php">hier</a> om verder te gaan.</div><? 
+                ?><div class="alert alert-success" role="alert">U bent al ingelogd. Klik <a href="https://stats.magicshoot.nl/page_dashboard_fast.php">hier</a> om verder te gaan.</div><?php
                 } 
               } 
             ?>

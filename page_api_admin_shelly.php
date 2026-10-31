@@ -93,7 +93,7 @@
                                             <tr><td><button type="submit" class="btn-sm btn-info">Opslaan</button></td></tr>
                                         </form>
                                     
-                                    <?
+                                    <?php
                                     }
                                 else { 
                                     ?>
